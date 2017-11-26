@@ -10,23 +10,7 @@ const manifest = {
 	databases: [
 		common.db.portfolios,
 		common.db.trades
-	],
-	views:  {
-		[common.db.trades]: {
-			all: {
-				map: function(doc) { emit(doc._id.split("x").shift(), null); }
-			},
-			sold: {
-				map: function(doc) { if (doc.profit.amount) { emit(doc._id.split("x").shift(), null); } }
-			}
-		},
-		[common.db.users]: {
-			all_enabled: {
-				map: function(doc) { if (doc.enabled === true) { emit(doc._id, doc.priority); } }
-			}
-		}
-
-	}
+	]
 };
 
 co(function* co() {
@@ -37,19 +21,21 @@ co(function* co() {
 		yield createDatabase(db);
 	}
 
-	common.log("info", ".:. Creating Views .:.");
-	for (const key in manifest.views) {
-		// creates the view
-		yield createView(key);
-	}
-
 	common.log("info", ".:. Seeding Trading Portfolio .:.");
 	try {
-		const portfolio = portfolioModel.create("portfolio");
-		yield db.saveDocument(portfolio, common.db.portfolios);
-		common.log("info", "* Document 'portfolio' created!");
+		yield db.removeDocument(portfolioModel.name, common.db.portfolios);
+		common.log("info", `* Document '${portfolioModel.name}' deleted!`);
 	} catch (err) {
-		common.log("warn", "! Seeding 'portfolio' failed");
+		throw new Error(err.stack);
+		common.log("warn", `* Deleting '${portfolioModel.name}' failed!`);
+	}
+
+	try {
+		const portfolio = portfolioModel.create(portfolioModel.name);
+		yield db.saveDocument(portfolio, common.db.portfolios);
+		common.log("info", `* Document '${portfolioModel.name}' created!`);
+	} catch (err) {
+		common.log("warn", `* Saving '${portfolioModel.name}' failed!`);
 	}
 	common.log("info", ".:. Seeding Complete! .:.");
 }).catch((err) => {
@@ -66,13 +52,4 @@ function* createDatabase(name) {
 		common.log("info", `* Database '${name}' created!`);
 	}
 	return confirmation;
-}
-
-function* createView(name) {
-	const result = yield db.saveView("listing", manifest.views[name], `${name}`);
-	if (result.error === true) {
-		common.log("warn", `! View '${name}' creation failed!`);
-	} else {
-		common.log("info", `* View '${name}' created!`);
-	}
 }
