@@ -57,8 +57,18 @@ adminMessageHandler = (data) => {
 	const matches = commandExp.exec(data.text);
 	const commands = {
 		buy: () => { },
-		sell: () => { return liquidate(matches[2], matches[3]); },
-		writeoff: () => { return writeoff(matches[2]); },
+		sell: () => {
+			if (!matches[3]) {
+				common.log("warn", "! Not enough parameters");
+				return;
+			}
+			return liquidate(matches[2], matches[3]); },
+		writeoff: () => {
+			if (!matches[2]) {
+				common.log("warn", "! Not enough parameters");
+				return;
+			}
+			return writeoff(matches[2]); },
 		halt: () => { return halt(); },
 		resume: () => { return resume(); },
 		exit: () => {
