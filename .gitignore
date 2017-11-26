@@ -34,3 +34,4 @@ config.edge.json
 # For deploying
 tmp
 results
+data
