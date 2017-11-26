@@ -387,6 +387,40 @@ const parseSignals = (msg) => {
 	return signals;
 };
 
+const purchase = function* purchase(pair, price, qty) {
+	const options = {
+		portfolio: "portfolio",
+		trades: common.db.trades,
+		marketDoc: null,
+		now: new Date().getTime()
+	};
+	common.log("info", `. Purchasing position in ${pair} at ${price} for ${qty}`);
+	let portfolio = yield db.getDocument(options.portfolio, common.db.portfolios);
+	// change reserved trades into completed
+	if (tradeConfig.live === true) {
+		common.log("info", "! Purchasing LIVE position on Bittrex");
+	}
+	const signal = {
+		action: "buy",
+		pair: pair,
+		qty: qty,
+		price: price,
+		meta: `${options.now}-command`
+	};
+	const trade = yield makeBuyTrade(portfolio, signal, {
+		prices: {
+			per: price,
+			purchase: price * qty
+		},
+		options: options
+	});
+	// make adjustments
+	portfolio = adjustBuyTrade(portfolio, trade.data);
+	// save our portfolio
+	yield db.saveDocument(portfolio, common.db.portfolios);
+	return trade.message;
+};
+
 const liquidate = function* liquidate(position, price) {
 	const options = {
 		portfolio: "portfolio",
@@ -463,6 +497,7 @@ module.exports = {
 	updatePositions: updatePositions,
 	parseSignals: parseSignals,
 	writeoff: writeoff,
+	purchase: purchase,
 	liquidate: liquidate,
 	halt: halt,
 	resume: resume

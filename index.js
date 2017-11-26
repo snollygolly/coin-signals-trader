@@ -53,22 +53,30 @@ bot.on("start", () => {
 });
 
 adminMessageHandler = (data) => {
-	const commandExp = /!(\w+) ?(\w+-\w+)? ?(A|\d?\.?\d+)?/i;
+	const commandExp = /!(\w+) ?(\w+-\w+)? ?(A|\d?\.?\d+)? ?(A|\d?\.?\d+)?/i;
 	const matches = commandExp.exec(data.text);
 	const commands = {
-		buy: () => { },
+		buy: () => {
+			if (!matches[3]) {
+				common.log("warn", "! Not enough parameters");
+				return;
+			}
+			return purchase(matches[2], matches[3], matches[4]);
+		},
 		sell: () => {
 			if (!matches[3]) {
 				common.log("warn", "! Not enough parameters");
 				return;
 			}
-			return liquidate(matches[2], matches[3]); },
+			return liquidate(matches[2], matches[3]);
+		},
 		writeoff: () => {
 			if (!matches[2]) {
 				common.log("warn", "! Not enough parameters");
 				return;
 			}
-			return writeoff(matches[2]); },
+			return writeoff(matches[2]);
+		},
 		halt: () => { return halt(); },
 		resume: () => { return resume(); },
 		exit: () => {
@@ -150,6 +158,17 @@ function updatePositions() {
 		throw new Error(err.stack);
 	});
 }
+
+function purchase(position, price, qty) {
+	co(function* co() {
+		const result = yield trading.purchase(position, price, qty);
+		yield bot.postMessage(config.slack.admin.channel, result, params);
+	}).catch((err) => {
+		common.log("error", "! Error during liquidation");
+		blocked = false;
+		throw new Error(err.stack);
+	});
+};
 
 function liquidate(position, price) {
 	co(function* co() {
