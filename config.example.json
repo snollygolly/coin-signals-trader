@@ -10,7 +10,7 @@
     "secret": "XXX",
     "channel": "signals",
     "bot": "XXX",
-    "admin": "XXX"
+    "password": "changeme"
   },
   "trading": {
     "api_key": "XXX",

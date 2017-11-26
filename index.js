@@ -4,6 +4,8 @@ const db = require("./services/db");
 const bittrex = require("./services/bittrex");
 const trading = require("./services/trading");
 
+const Promise = require("bluebird");
+const fs = Promise.promisifyAll(require("fs"));
 const co = require("co");
 const SlackBot = require("slackbots");
 
@@ -24,9 +26,19 @@ const bot = new SlackBot({
 	name: config.slack.name
 });
 
+const params = {
+	icon_emoji: ":money_with_wings:"
+};
+
 bot.on("start", () => {
 	common.log("info", "* Connected!");
-	bot.postMessage(config.slack.channel, "I've joined!").then((data) => {
+	// check to see if this is the first time running
+	if (!config.slack.admin) {
+		common.log("verbose", "+ Starting in setup mode");
+		return;
+	}
+
+	bot.postMessage(config.slack.admin.channel, "I've joined!", params).then((data) => {
 		// everything was successful, let's start the bot
 		// TODO: check to make sure we have enough money
 		common.log("info", `+ Joined ${config.slack.channel}`);
@@ -40,7 +52,7 @@ bot.on("start", () => {
 	});
 });
 
-bot.on("message", (data) => {
+const signalMessageHandler = (data) => {
 	if (started === false) {
 		common.log("warn", "! Events can't be parsed because the bot hasn't been started");
 		return;
@@ -50,7 +62,7 @@ bot.on("message", (data) => {
 		return;
 	}
 	// handle admin stuff
-	if (data.user === config.slack.admin && data.type === "message") {
+	if (data.user === config.slack.admin.user && data.type === "message") {
 		if (data.text === "ping") {
 			common.log("info", "! Pong");
 			return;
@@ -98,11 +110,20 @@ bot.on("message", (data) => {
 		return;
 	}
 	createSignal(data);
-});
+};
+
+let messageHandler;
+
+if (!config.slack.admin) {
+	messageHandler = handleSetup;
+} else {
+	messageHandler = signalMessageHandler;
+}
+
+bot.on("message", messageHandler);
 
 function createSignal(data) {
 	const signals = trading.parseSignals(data);
-	// TODO: consider handling multiple signals from a batch
 	signal = signals.shift();
 };
 
@@ -117,7 +138,7 @@ function updatePositions() {
 			const result = yield trading.buySignal(signal);
 			signal = null;
 			if (result !== false) {
-				yield bot.postMessage(config.slack.channel, result);
+				yield bot.postMessage(config.slack.admin.channel, result, params);
 			}
 		}
 		const marketData = yield trading.updateData();
@@ -127,7 +148,7 @@ function updatePositions() {
 		blocked = false;
 		if (result !== false) {
 			for (const item of result) {
-				yield bot.postMessage(config.slack.channel, item);
+				yield bot.postMessage(config.slack.admin.channel, item, params);
 			}
 		}
 	}).catch((err) => {
@@ -140,7 +161,7 @@ function updatePositions() {
 function liquidate(position, price) {
 	co(function* co() {
 		const result = yield trading.liquidate(position, price);
-		yield bot.postMessage(config.slack.channel, result);
+		yield bot.postMessage(config.slack.admin.channel, result, params);
 	}).catch((err) => {
 		common.log("error", "! Error during liquidation");
 		blocked = false;
@@ -151,7 +172,7 @@ function liquidate(position, price) {
 function writeoff(position) {
 	co(function* co() {
 		const result = yield trading.writeoff(position);
-		yield bot.postMessage(config.slack.channel, result);
+		yield bot.postMessage(config.slack.admin.channel, result, params);
 	}).catch((err) => {
 		common.log("error", "! Error during writeoff");
 		blocked = false;
@@ -163,7 +184,7 @@ function writeoff(position) {
 function halt() {
 	co(function* co() {
 		const result = yield trading.halt();
-		yield bot.postMessage(config.slack.channel, "Halted trading, monitoring only");
+		yield bot.postMessage(config.slack.admin.channel, "Halted trading, monitoring only", params);
 	}).catch((err) => {
 		common.log("error", "! Error during halting");
 		blocked = false;
@@ -173,7 +194,7 @@ function halt() {
 
 function exitPositions() {
 	co(function* co() {
-		yield bot.postMessage(config.slack.channel, `${exiting === true ? "No new" : "Accepting all"} orders`);
+		yield bot.postMessage(config.slack.admin.channel, `${exiting === true ? "No new" : "Accepting all"} orders`, params);
 	}).catch((err) => {
 		common.log("error", "! Error during exit positions");
 		blocked = false;
@@ -186,10 +207,33 @@ function resume() {
 	co(function* co() {
 		const result = yield trading.resume();
 		if (result !== false) {
-			yield bot.postMessage(config.slack.channel, "Resuming trading");
+			yield bot.postMessage(config.slack.admin.channel, "Resuming trading", params);
 		}
 	}).catch((err) => {
 		common.log("error", "! Error during resume");
+		blocked = false;
+		throw new Error(err.stack);
+	});
+};
+
+function handleSetup(data) {
+	if (!data.text || data.subtype === "bot_message") { return; }
+	console.log(data);
+	co(function* co() {
+		// check for the password
+		if (data.text.indexOf(config.slack.password) !== -1) {
+			// they entered the password
+			config.slack.admin = {
+				user: data.user,
+				channel: data.channel
+			};
+			yield fs.writeFileAsync(`${__dirname}/config.json`, JSON.stringify(config, null, 2));
+			yield bot.postMessage(config.slack.admin.channel, "You've been authenticated!  The bot will now restart.", params);
+			process.exit();
+		}
+		yield bot.postMessage(data.channel, "Please authenticate by sending me the password you chose in the config.json file.", params);
+	}).catch((err) => {
+		common.log("error", "! Error during authentication");
 		blocked = false;
 		throw new Error(err.stack);
 	});
