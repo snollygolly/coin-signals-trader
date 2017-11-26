@@ -218,7 +218,6 @@ function resume() {
 
 function handleSetup(data) {
 	if (!data.text || data.subtype === "bot_message") { return; }
-	console.log(data);
 	co(function* co() {
 		// check for the password
 		if (data.text.indexOf(config.slack.password) !== -1) {
@@ -228,7 +227,7 @@ function handleSetup(data) {
 				channel: data.channel
 			};
 			yield fs.writeFileAsync(`${__dirname}/config.json`, JSON.stringify(config, null, 2));
-			yield bot.postMessage(config.slack.admin.channel, "You've been authenticated!  The bot will now restart.", params);
+			yield bot.postMessage(config.slack.admin.channel, "You've been authenticated!  You must restart the bot now.", params);
 			process.exit();
 		}
 		yield bot.postMessage(data.channel, "Please authenticate by sending me the password you chose in the config.json file.", params);
