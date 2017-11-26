@@ -84,10 +84,6 @@ const buySignal = function* buySignal(signal, options = null) {
 		return false;
 	}
 	// start calculating potential costs
-	// use points to dynamically scale orders
-	// TODO: get threshold?
-	const ratio = 0.5 / (tradeConfig.max_points - 20);
-	const mod = signal.points > tradeConfig.max_points ? 1 : ((signal.points - 20) * ratio) + 0.5;
 	// if we have more money than the max order price, use the order price, if not, use the balance - mins
 	let allMarkets;
 	// for injecting your own summary
@@ -96,11 +92,19 @@ const buySignal = function* buySignal(signal, options = null) {
 	} else {
 		allMarkets = options.marketDoc;
 	}
-	const prices = {
-		per: common.bitRound(allMarkets[signal.pair].summary["Ask"]),
-		purchase: (portfolio.balance > (tradeConfig.max_position_price * mod)) ? (tradeConfig.max_position_price * mod) : (portfolio.balance - tradeConfig.min_balance)
-	};
-	// TODO: maybe offer something better than this?
+	// set prices dynamically depending on configuration
+	let prices;
+	if (signal.price !== "A" && signal.qty !== "A") {
+		prices = {
+			per: common.bitRound(signal.price),
+			purchase: (portfolio.balance > (signal.price * signal.qty)) ? (signal.price * signal.qty) : (portfolio.balance - tradeConfig.min_balance)
+		};
+	} else {
+		prices = {
+			per: common.bitRound(allMarkets[signal.pair].summary["Ask"]),
+			purchase: (portfolio.balance > (tradeConfig.max_position_price)) ? (tradeConfig.max_position_price) : (portfolio.balance - tradeConfig.min_balance)
+		};
+	}
 	// do the trade
 	const trade = yield makeBuyTrade(portfolio, signal, {
 		prices: prices,
@@ -366,29 +370,20 @@ const updatePositions = function* updatePositions(options = null) {
 
 const parseSignals = (msg) => {
 	const signals = [];
-	const header = msg.text.replace("\n", "");
-	const headingExp = /Message.{2}(\d+x\d+).+Found.{2}(.+)_/i;
-	const exchangeExp = /https:\/\/(.+)\.\w+.+\|(\w+-\w+)>.+Points: _(\d+\.?\d+?)/i;
-	const matches = headingExp.exec(header);
-	if (matches.length < 3) {
-		common.log("error", "! Bad messages");
+	const signalExp = /\^(\w+)\*(\w+-\w+)\*(A|\d?\.?\d+)\*(A|\d?\.?\d+)\*(.*)\^/i;
+	const matches = signalExp.exec(msg.text);
+	if (matches.length !== 6) {
+		common.log("error", "! Bad message");
 		return [];
 	}
-	for (const item of msg.attachments) {
-		const exchangeMatches = exchangeExp.exec(item.text);
-		if (exchangeMatches.length === null) {
-			common.log("error", "! Bad exchange message");
-			return;
-		}
-		const signal = {
-			id: matches[1],
-			found: matches[2],
-			exchange: exchangeMatches[1],
-			pair: exchangeMatches[2],
-			points: exchangeMatches[3]
-		};
-		signals.push(signal);
-	}
+	const signal = {
+		action: matches[1],
+		pair: matches[2],
+		qty: matches[3],
+		price: matches[4],
+		meta: matches[5]
+	};
+	signals.push(signal);
 	return signals;
 };
 
@@ -611,7 +606,7 @@ function* makeRefundTrade(portfolio, position, data) {
 
 function* makeBuyTrade(portfolio, signal, data) {
 	const trade = {
-		_id: `${signal.id}-buy`,
+		_id: `${signal.meta}-buy`,
 		created: data.options.now.toString(),
 		pair: signal.pair,
 		price: data.prices.per,

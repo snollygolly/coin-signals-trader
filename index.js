@@ -53,6 +53,7 @@ bot.on("start", () => {
 });
 
 const signalMessageHandler = (data) => {
+	if (data.type !== "message") { return; }
 	if (started === false) {
 		common.log("warn", "! Events can't be parsed because the bot hasn't been started");
 		return;
@@ -62,7 +63,7 @@ const signalMessageHandler = (data) => {
 		return;
 	}
 	// handle admin stuff
-	if (data.user === config.slack.admin.user && data.type === "message") {
+	if (data.user === config.slack.admin.user && data.channel === config.slack.admin.channel) {
 		if (data.text === "ping") {
 			common.log("info", "! Pong");
 			return;
@@ -98,17 +99,12 @@ const signalMessageHandler = (data) => {
 		}
 		return;
 	}
-	if (!data.bot_id) {
-		// common.log("verbose", "! No bot ID");
-		return;
+	if (data.channel !== config.slack.channel.id) { return; }
+	if (config.slack.channel.bot !== "debug") {
+		if (!data.bot_id) { return; }
+		if (data.bot_id !== config.slack.channel.bot) { return; }
 	}
-	if (data.bot_id !== config.slack.bot) {
-		// common.log("verbose", "! Bad bot ID");
-		return;
-	}
-	if (exiting === true) {
-		return;
-	}
+	if (exiting === true) { return; }
 	createSignal(data);
 };
 
