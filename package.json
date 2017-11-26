@@ -1,0 +1,39 @@
+{
+  "name": "coin-signals-trader",
+  "version": "1.0.0",
+  "description": "A bot for buying and selling cryptocurrencies",
+  "main": "index.js",
+  "scripts": {
+    "start": "./node_modules/.bin/nodemon -e js,hbs ./index.js",
+    "test": "./node_modules/.bin/eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/snollygolly/coin-signals-trader.git"
+  },
+  "author": "snollygolly (@snollygolly)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/snollygolly/coin-signals-trader/issues"
+  },
+  "homepage": "https://github.com/snollygolly/coin-signals-trader#readme",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "chai": "^4.1.1",
+    "cheerio": "^1.0.0-rc.2",
+    "co": "^4.6.0",
+    "cradle": "^0.7.1",
+    "crypto-js": "^3.1.9-1",
+    "mocha": "^3.5.0",
+    "moment": "^2.18.1",
+    "node-telegram-bot-api": "^0.27.1",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1",
+    "slackbots": "^1.0.2",
+    "winston": "^2.3.1"
+  },
+  "devDependencies": {
+    "eslint": "^4.12.0",
+    "nodemon": "^1.11.0"
+  }
+}

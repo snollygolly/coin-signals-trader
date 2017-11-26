@@ -1,0 +1,19 @@
+{
+  "name": "Coin Signals Trader",
+  "bittrex": {
+    "api_key": "XXX",
+    "api_secret": "XXX"
+  },
+  "slack": {
+    "url": "XXX",
+    "name": "Coin Trader",
+    "secret": "XXX",
+    "channel": "signals",
+    "bot": "XXX",
+    "admin": "XXX"
+  },
+  "trading": {
+    "api_key": "XXX",
+    "api_secret": "XXX"
+  }
+}
