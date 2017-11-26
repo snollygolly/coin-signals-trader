@@ -4,9 +4,9 @@ The Coin Signals trader is meant to allow anyone to quickly and easily set up an
 ## Donate
 This is a free project, so if you're like to thank me for my work, I'd really appreciate that.
 
-BTC - __1E6Vyh84pTEP9v6Sh8Yzm693pBZLvguX3m__
-ETH - __0xb2921b476838c8DB9a29d708B3cA8c11959D7c7D__
-LTC - __LfkD8jcgv4E2rDta4hA2CUHNMiPGdZL1yr__
+- BTC - __1E6Vyh84pTEP9v6Sh8Yzm693pBZLvguX3m__
+- ETH - __0xb2921b476838c8DB9a29d708B3cA8c11959D7c7D__
+- LTC - __LfkD8jcgv4E2rDta4hA2CUHNMiPGdZL1yr__
 
 ## Prerequisites
 * [Node.js](https://nodejs.org/en/) (Version 6 and up recommended)
