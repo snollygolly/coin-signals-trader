@@ -52,53 +52,40 @@ bot.on("start", () => {
 	});
 });
 
+adminMessageHandler = (data) => {
+	const commandExp = /!(\w+) ?(\w+-\w+)? ?(A|\d?\.?\d+)?/i;
+	const matches = commandExp.exec(data.text);
+	const commands = {
+		buy: () => { },
+		sell: () => { return liquidate(matches[2], matches[3]); },
+		writeoff: () => { return writeoff(matches[2]); },
+		halt: () => { return halt(); },
+		resume: () => { return resume(); },
+		exit: () => {
+			exiting = !exiting;
+			common.log("info", `+ ${exiting === true ? "No new" : "Accepting all"} orders`);
+			return exitPositions();
+		},
+		ping: () => { common.log("info", "! Pong"); }
+	};
+	if (!matches[1] || !commands[matches[1]]) {
+		common.log("error", "! Bad command");
+		return;
+	}
+	return commands[matches[1]]();
+};
+
 const signalMessageHandler = (data) => {
 	if (data.type !== "message") { return; }
 	if (started === false) {
 		common.log("warn", "! Events can't be parsed because the bot hasn't been started");
 		return;
 	}
-	if (data.text === "ping") {
-		common.log("info", "! Pong");
-		return;
-	}
 	// handle admin stuff
 	if (data.user === config.slack.admin.user && data.channel === config.slack.admin.channel) {
-		if (data.text === "ping") {
-			common.log("info", "! Pong");
-			return;
-		}
-		if (data.text.indexOf("HALT") !== -1) {
-			return halt();
-		}
-		if (data.text.indexOf("RESUME") !== -1) {
-			return resume();
-		}
-		if (data.text.indexOf("EXIT") !== -1) {
-			exiting = !exiting;
-			common.log("info", `+ ${exiting === true ? "No new" : "Accepting all"} orders`);
-			return exitPositions();
-		}
-		if (data.text.indexOf("SELL") !== -1) {
-			// manual liquidation
-			const sellParts = data.text.split(" ");
-			if (sellParts.length !== 3) {
-				common.log("warn", "! Malformed liquidation attempt");
-				return;
-			}
-			return liquidate(sellParts[1], sellParts[2]);
-		}
-		if (data.text.indexOf("WRITEOFF") !== -1) {
-			// manual liquidation
-			const sellParts = data.text.split(" ");
-			if (sellParts.length !== 2) {
-				common.log("warn", "! Malformed writeoff attempt");
-				return;
-			}
-			return writeoff(sellParts[1]);
-		}
-		return;
+		return adminMessageHandler(data);
 	}
+	// handle signal stuff
 	if (data.channel !== config.slack.channel.id) { return; }
 	if (config.slack.channel.bot !== "debug") {
 		if (!data.bot_id) { return; }
