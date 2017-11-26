@@ -36,10 +36,8 @@ exports.deleteDatabase = function* deleteDatabase(database) {
 exports.getDocument = function* getDocument(id, database) {
 	try {
 		const file = yield fs.readFileAsync(`${__dirname}/../data/${database}/${id}.json`);
-		const result = {
-			error: false,
-			data: JSON.parse(file)
-		};
+		const result = JSON.parse(file);
+		result.error = false;
 		return result;
 	} catch (err) {
 		return {
