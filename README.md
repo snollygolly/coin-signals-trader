@@ -63,7 +63,7 @@ This is how many coins you want to affect in this signal.  If you'd like the tra
 This is the per coin price you want to use for this signal.  If you'd like the trader bot to use it's default, you can pass "A"
 
 - Meta
-If you'd like to attach addition information to your signal, you may do it here.  The symbol * may not be used in meta information though.
+If you'd like to attach addition information to your signal, you may do it here.  The symbol * may not be used in meta information though.  This string will be used to create filenames for your trades.  It's suggested that you supply a unique string for each signal.  Timestamps are a good choice.
 
 ### Example
 
