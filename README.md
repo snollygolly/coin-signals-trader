@@ -37,7 +37,9 @@ npm start
 ## Universal Signal Format
 Signals are sent via Slack and are expected to be in the correct format:
 
-ACTION*PAIR*QUANTITY*PRICE*META
+```
+^ACTION*PAIR*QUANTITY*PRICE*META^
+```
 
 - Action _(Required)_
 This is the action you want the trader to take
