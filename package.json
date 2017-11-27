@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "./node_modules/.bin/nodemon -e js,hbs ./index.js",
+    "seed": "node seed.js",
     "test": "./node_modules/.bin/eslint ."
   },
   "repository": {

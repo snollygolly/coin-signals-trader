@@ -27,12 +27,19 @@ npm install
 
 * Create your config.  There's a `config.json.example` file in the root.  Edit it to include all your values.  Refer to the configuration breakdown for more information about what does what.  Save it as `config.json` and leave it in the root.
 
+_Note: You will need to choose a password to complete the initial set up.  Make sure it's something people aren't likely to guess_
+
+* Seed your database
+```
+npm run seed
+```
+
 * Run the bot!
 ```
 npm start
 ```
 
-* Private message the bot in slack to get started
+* Private message the bot in slack to get started and follow the directions from there
 
 ## Universal Signal Format
 Signals are sent via Slack and are expected to be in the correct format:
