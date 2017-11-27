@@ -16,7 +16,6 @@ const data = {
 let started = false;
 let blocked = false;
 let exiting = false;
-let signal = null;
 
 common.log("info", `* Connecting to Slack as ${config.slack.name}`);
 
@@ -41,7 +40,7 @@ bot.on("start", () => {
 	bot.postMessage(config.slack.admin.channel, "I've joined!", params).then((data) => {
 		// everything was successful, let's start the bot
 		// TODO: check to make sure we have enough money
-		common.log("info", `+ Joined ${config.slack.channel}`);
+		common.log("info", `+ Joined #${config.slack.channel.name}`);
 		started = true;
 		// starting update loop
 		updatePositions();
@@ -125,7 +124,26 @@ bot.on("message", messageHandler);
 
 function createSignal(data) {
 	const signals = trading.parseSignals(data);
-	signal = signals.shift();
+	const signal = signals.shift();
+	if (blocked === true) {
+		common.log("error", "! Updates can't be performed because we are blocked");
+		return;
+	}
+	blocked = true;
+	co(function* co() {
+		let result;
+		if (signal.action === "BUY") {
+			result = yield trading.buySignal(signal);
+		} else if (signal.action === "SELL") {
+			result = yield trading.liquidate(signal.pair, signal.price);
+		}
+		blocked = false;
+		yield bot.postMessage(config.slack.admin.channel, result, params);
+	}).catch((err) => {
+		common.log("error", "! Error during signal creation");
+		blocked = false;
+		throw new Error(err.stack);
+	});
 };
 
 function updatePositions() {
@@ -135,13 +153,6 @@ function updatePositions() {
 	}
 	blocked = true;
 	co(function* co() {
-		if (signal !== null) {
-			const result = yield trading.buySignal(signal);
-			signal = null;
-			if (result !== false) {
-				yield bot.postMessage(config.slack.admin.channel, result, params);
-			}
-		}
 		const marketData = yield trading.updateData();
 		result = yield trading.updatePositions({
 			marketDoc: marketData
