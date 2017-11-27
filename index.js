@@ -55,41 +55,63 @@ adminMessageHandler = (data) => {
 	const commandExp = /!(\w+) ?(\w+-\w+)? ?(A|\d?\.?\d+)? ?(A|\d?\.?\d+)?/i;
 	const matches = commandExp.exec(data.text);
 	const commands = {
-		buy: () => {
+		buy: function* buy() {
 			if (!matches[3]) {
 				common.log("warn", "! Not enough parameters");
 				return;
 			}
-			return purchase(matches[2], matches[3], matches[4]);
+			const result = yield trading.purchase(matches[2], matches[3], matches[4]);
+			yield bot.postMessage(config.slack.admin.channel, result, params);
 		},
-		sell: () => {
+		sell: function* sell() {
 			if (!matches[3]) {
 				common.log("warn", "! Not enough parameters");
 				return;
 			}
-			return liquidate(matches[2], matches[3]);
+			const result = yield trading.liquidate(matches[2], matches[3]);
+			yield bot.postMessage(config.slack.admin.channel, result, params);
 		},
-		writeoff: () => {
+		writeoff: function* writeoff() {
 			if (!matches[2]) {
 				common.log("warn", "! Not enough parameters");
 				return;
 			}
-			return writeoff(matches[2]);
+			const result = yield trading.writeoff(matches[2]);
+			yield bot.postMessage(config.slack.admin.channel, result, params);
 		},
-		halt: () => { return halt(); },
-		resume: () => { return resume(); },
-		exit: () => {
+		halt: function* halt() {
+			const result = yield trading.halt();
+			yield bot.postMessage(config.slack.admin.channel, "Halted trading, monitoring only", params);
+		 },
+		resume: function*  resume() {
+			const result = yield trading.resume();
+			if (result !== false) {
+				yield bot.postMessage(config.slack.admin.channel, "Resuming trading", params);
+			}
+		},
+		exit: function* exit() {
 			exiting = !exiting;
-			common.log("info", `+ ${exiting === true ? "No new" : "Accepting all"} orders`);
-			return exitPositions();
+			const result = `${exiting === true ? "No new" : "Accepting all"} orders`;
+			common.log("info", `+ ${result}`);
+			yield bot.postMessage(config.slack.admin.channel, result, params);
 		},
-		ping: () => { common.log("info", "! Pong"); }
+		ping: function* ping() {
+			common.log("info", "! Pong");
+			yield bot.postMessage(config.slack.admin.channel, "Pong", params);
+		}
 	};
 	if (!matches[1] || !commands[matches[1]]) {
 		common.log("error", "! Bad command");
 		return;
 	}
-	return commands[matches[1]]();
+	// actually take action on the message
+	co(function* co() {
+		yield commands[matches[1]]();
+	}).catch((err) => {
+		common.log("error", "! Error during admin command");
+		blocked = false;
+		throw new Error(err.stack);
+	});
 };
 
 const signalMessageHandler = (data) => {
@@ -169,75 +191,6 @@ function updatePositions() {
 		throw new Error(err.stack);
 	});
 }
-
-function purchase(position, price, qty) {
-	co(function* co() {
-		const result = yield trading.purchase(position, price, qty);
-		yield bot.postMessage(config.slack.admin.channel, result, params);
-	}).catch((err) => {
-		common.log("error", "! Error during liquidation");
-		blocked = false;
-		throw new Error(err.stack);
-	});
-};
-
-function liquidate(position, price) {
-	co(function* co() {
-		const result = yield trading.liquidate(position, price);
-		yield bot.postMessage(config.slack.admin.channel, result, params);
-	}).catch((err) => {
-		common.log("error", "! Error during liquidation");
-		blocked = false;
-		throw new Error(err.stack);
-	});
-};
-
-function writeoff(position) {
-	co(function* co() {
-		const result = yield trading.writeoff(position);
-		yield bot.postMessage(config.slack.admin.channel, result, params);
-	}).catch((err) => {
-		common.log("error", "! Error during writeoff");
-		blocked = false;
-		throw new Error(err.stack);
-	});
-};
-
-
-function halt() {
-	co(function* co() {
-		const result = yield trading.halt();
-		yield bot.postMessage(config.slack.admin.channel, "Halted trading, monitoring only", params);
-	}).catch((err) => {
-		common.log("error", "! Error during halting");
-		blocked = false;
-		throw new Error(err.stack);
-	});
-};
-
-function exitPositions() {
-	co(function* co() {
-		yield bot.postMessage(config.slack.admin.channel, `${exiting === true ? "No new" : "Accepting all"} orders`, params);
-	}).catch((err) => {
-		common.log("error", "! Error during exit positions");
-		blocked = false;
-		throw new Error(err.stack);
-	});
-};
-
-
-function resume() {
-	co(function* co() {
-		const result = yield trading.resume();
-		if (result !== false) {
-			yield bot.postMessage(config.slack.admin.channel, "Resuming trading", params);
-		}
-	}).catch((err) => {
-		common.log("error", "! Error during resume");
-		blocked = false;
-		throw new Error(err.stack);
-	});
-};
 
 function handleSetup(data) {
 	if (!data.text || data.subtype === "bot_message") { return; }
