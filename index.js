@@ -40,13 +40,13 @@ bot.on("start", () => {
 	bot.postMessage(config.slack.admin.channel, "I've joined!", params).then((data) => {
 		// everything was successful, let's start the bot
 		// TODO: check to make sure we have enough money
-		common.log("info", `+ Joined #${config.slack.channel.name}`);
+		common.log("info", `+ Joined #${config.slack.admin.channel}`);
 		started = true;
 		// starting update loop
 		updatePositions();
 		positionLoop = setInterval(updatePositions, 10000);
 	}).fail((data) => {
-		common.log("warn", `! You don't have access to ${config.slack.channel}`);
+		common.log("warn", `! You don't have access to ${config.slack.admin.channel}`);
 		return;
 	});
 });
@@ -100,7 +100,7 @@ adminMessageHandler = (data) => {
 			yield bot.postMessage(config.slack.admin.channel, "Pong", params);
 		}
 	};
-	if (!matches[1] || !commands[matches[1]]) {
+	if (!matches || !matches[1] || !commands[matches[1]]) {
 		common.log("error", "! Bad command");
 		return;
 	}
