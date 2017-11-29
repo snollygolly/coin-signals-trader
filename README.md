@@ -2,7 +2,7 @@
 The Coin Signals trader is meant to allow anyone to quickly and easily set up an automated trading bot.  This bot relies on __Signals__ which are supplied via Slack in the __Universal Signal Format__.  This project doesn't generate it's own signals, it only acts on ones that it receives.
 
 ## Donate
-This is a free project, so if you're like to thank me for my work, I'd really appreciate that.
+This is a free project, so if you'd like to support my work, I'd really appreciate that.
 
 - BTC - __1E6Vyh84pTEP9v6Sh8Yzm693pBZLvguX3m__
 - ETH - __0xb2921b476838c8DB9a29d708B3cA8c11959D7c7D__
@@ -63,7 +63,7 @@ This is how many coins you want to affect in this signal.  If you'd like the tra
 This is the per coin price you want to use for this signal.  If you'd like the trader bot to use it's default, you can pass "A"
 
 - Meta
-If you'd like to attach addition information to your signal, you may do it here.  The symbol * may not be used in meta information though.
+If you'd like to attach addition information to your signal, you may do it here.  The symbol * may not be used in meta information though.  This string will be used to create filenames for your trades.  It's suggested that you supply a unique string for each signal.  Timestamps are a good choice.
 
 ### Example
 
