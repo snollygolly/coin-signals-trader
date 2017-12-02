@@ -159,11 +159,11 @@ function createSignal(data) {
 		} else if (signal.action === "SELL") {
 			result = yield trading.liquidate(signal.pair, signal.price);
 		}
+		blocked = false;
 		if (result === false) {
 			// something went wrong
 			return;
 		}
-		blocked = false;
 		yield bot.postMessage(config.slack.admin.channel, result, params);
 	}).catch((err) => {
 		common.log("error", "! Error during signal creation");
