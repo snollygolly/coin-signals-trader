@@ -19,7 +19,7 @@ module.exports.config = {
 			time: 7200000
 		}
 	},
-	order_parsing: true,
+	order_parsing: false,
 	orders: {
 		spread_ask: 0.01,
 		spread_ask_insta: 0.001,
