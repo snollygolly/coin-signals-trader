@@ -1,6 +1,8 @@
 # :money_with_wings: Coin Signals Trader
 The Coin Signals trader is meant to allow anyone to quickly and easily set up an automated trading bot.  This bot relies on __Signals__ which are supplied via Slack in the __Universal Signal Format__.  This project doesn't generate it's own signals, it only acts on ones that it receives.
 
+I run a signal generation service on Slack that you're welcome to use for testing.  Join us in [Slack](https://join.slack.com/t/coinsignals/shared_invite/enQtMjc3NjE1NDgxODI3LWI1YTlkOGI0MmVjNjU1MDE1ZWQwNDkwNDRlNThhZWU0ZTcyN2ZjNjZiYzdkMTZjNzMyMTk3MzFhNWVmMWVlNDA) to see the signals (in #signals), chat, and get help.
+
 ## Donate
 This is a free project, so if you'd like to support my work, I'd really appreciate that.
 
