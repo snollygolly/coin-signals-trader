@@ -45,34 +45,49 @@ npm start
 The bot responds to several commands via Slack private message:
 
 - !buy PAIR PRICE QTY
+
 _Example:_ `!buy BTC-LTC 0.009 1`
 
 - !sell PAIR PRICE
+
 _Example:_ `!buy BTC-LTC 0.0095`
+
 _Note: This command will automatically sell all coins you've purchased through the bot._
 
 - !portfolio
+
 _Example:_ `!portfolio`
+
 _Note: Using this command will show you some basic statistics about your portfolio.  This command is fairly basic for the time being, but it will show you how many trades you've made, and how you are doing overall._
 
 - !writeoff PAIR
+
 _Example:_ `!writeoff BTC-lTC`
+
 _Note: Using this command will refund the cost of the buy for this pair.  It will also remove it from your porfolio.  This can be useful if you'd like to continue to hold a position and the bot is prepared to sell it.  It doesn't actually sell or refund the position, only on paper._
 
 - !halt
+
 _Example:_ `!halt`
+
 _Note: If you don't want to take on any new positions or sell any currently held positions, you can halt trading with this command._
 
 - !resume
+
 _Example:_ `!resume`
+
 _Note: If trading is halted, you can resume it with this command._
 
 - !exit
+
 _Example:_ `!exit`
+
 _Note: You'd think it would exit the bot, but it doesn't doesn't.  It's poorly named.  It will actually prevent you from accepting new orders, but it will allow you to exit out of existing orders._
 
 - !ping
+
 _Example:_ `!ping`
+
 _Note: Says "Pong"._
 
 ## Universal Signal Format
