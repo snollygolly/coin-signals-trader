@@ -72,9 +72,31 @@ exports.removeDocument = function* removeDocument(id, database) {
 		};
 		return confirmation;
 	} catch (err) {
+		throw new Error(err.stack);
 		return {
 			error: true,
 			message: `DB: Delete of [${database}/${id}] failed`
+		};
+	}
+};
+
+exports.runView = function* runView(exp, database) {
+	try {
+		const matchedTrades = [];
+		const trades = yield fs.readdirAsync(`${__dirname}/../data/${database}`);
+		for (const trade of trades) {
+			const match = exp.test(trade);
+			if (match === true) {
+				const file = yield fs.readFileAsync(`${__dirname}/../data/${database}/${trade}`);
+				matchedTrades.push(JSON.parse(file));
+			}
+		}
+		return matchedTrades;
+	} catch (err) {
+		throw new Error(err.stack);
+		return {
+			error: true,
+			message: `DB: View of [${database}] failed`
 		};
 	}
 };

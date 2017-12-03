@@ -6,14 +6,8 @@ winston.level = "verbose";
 
 module.exports = {
 	db: {
-		"contact": "coin-signals_contact",
-		"external": "coin-signals_external",
-		"markets": "coin-signals_markets",
-		"messages": "coin-signals_messages",
 		"portfolios": "coin-signals_portfolios",
-		"scores": "coin-signals_scores",
-		"trades": "coin-signals_trades",
-		"users": "coin-signals_users"
+		"trades": "coin-signals_trades"
 	},
 	log: (level, msg) => {
 		winston.log(level, msg);
@@ -51,7 +45,7 @@ module.exports = {
 		return parseFloat(price).toFixed(8);
 	},
 	percent: (price) => {
-		return (Math.floor(price * 1000) / 10).toFixed(3);
+		return (Math.floor(price * 100000) / 1000).toFixed(3);
 	},
 	getRandomArbitrary: (min, max) => {
 		return Math.random() * (max - min) + min;

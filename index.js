@@ -1,4 +1,5 @@
 const config = require("./config.json");
+const tradeConfig = require("./config/trading").config;
 const common = require("./services/common");
 const db = require("./services/db");
 const bittrex = require("./services/bittrex");
@@ -96,8 +97,30 @@ adminMessageHandler = (data) => {
 			yield bot.postMessage(config.slack.admin.channel, result, params);
 		},
 		ping: function* ping() {
+			// remove me
 			common.log("info", "! Pong");
 			yield bot.postMessage(config.slack.admin.channel, "Pong", params);
+		},
+		portfolio: function* portfolio() {
+			let trades = yield db.runView(new RegExp(/-sell/g), common.db.trades);
+			const portfolio = yield db.getDocument("portfolio", common.db.portfolios);
+			const stats = {
+				totalProfit: 0,
+				totalProfitPerc: 0,
+				trades: 0
+			};
+			for (const trade of trades) {
+				stats.totalProfit += parseFloat(trade.profit.amount);
+				stats.trades++;
+			}
+			trades = trades.sort((a, b) => {
+				return parseInt(b.created) - parseInt(a.created);
+			});
+			stats.totalProfitPerc = `${common.percent(stats.totalProfit / tradeConfig.balance)}%`;
+			const message = `
+				You've sold ${stats.trades} positions so far and you still have ${Object.keys(portfolio.positions).length} more open.\nYou've made ${stats.totalProfit} BTC in total profit for a return of ${stats.totalProfitPerc}.
+			`;
+			yield bot.postMessage(config.slack.admin.channel, message, params);
 		}
 	};
 	if (!matches || !matches[1] || !commands[matches[1]]) {
