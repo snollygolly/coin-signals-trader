@@ -152,27 +152,25 @@ The configuration file for the `bot` project is fairly simple and consists mainl
   "name": "Coin Signals Trader",
   "bittrex": {
     "api_key": "XXX",
-    "api_secret": "XXX"
-  },
-  "slack": {
-    "url": "XXX",
-    [the webhook url]
-    "name": "Coin Trader",
-    [the name of the bot]
-    "secret": "XXX",
-    [from your slack app]
-    "channel": "signals",
-    [what channel in slack to join]
-    "bot": "XXX",
-    [the id of the bot who's signals you are consuming]
-    "admin": "XXX"
-    [the id of the user who can execute commands]
-  },
-  "trading": {
-    "api_key": "XXX",
     [your bittrex key for trading]
     "api_secret": "XXX"
     [your bittrex secret for trading]
+  },
+  "slack": {
+    "name": "Coin Trader",
+    [the name of your bot]
+    "secret": "XXX",
+    [from your slack app]
+    "channel": {
+      "name": "signals",
+      [the name of the channel you'll join, without the pound sign]
+      "id": "C86832X08",
+      [the id of the channel you'll join]
+      "bot": "B86C7N9UH"
+      [the id of the bot sending signals]
+    },
+    "password": "changeme"
+    [the password you'll need to first time setup of the bot]
   }
 }
 ```

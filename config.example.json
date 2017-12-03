@@ -5,15 +5,13 @@
     "api_secret": "XXX"
   },
   "slack": {
-    "url": "XXX",
     "name": "Coin Trader",
     "secret": "XXX",
-    "channel": "signals",
-    "bot": "XXX",
+    "channel": {
+      "name": "signals",
+      "id": "C86832X08",
+      "bot": "B86C7N9UH"
+    },
     "password": "changeme"
-  },
-  "trading": {
-    "api_key": "XXX",
-    "api_secret": "XXX"
   }
 }

@@ -263,8 +263,8 @@ module.exports = {
 				rate: rate
 			},
 			api: {
-				key: config.trading.api_key,
-				secret: config.trading.api_secret
+				key: config.bittrex.api_key,
+				secret: config.bittrex.api_secret
 			}
 		});
 		// check for errors
@@ -282,8 +282,8 @@ module.exports = {
 				rate: rate
 			},
 			api: {
-				key: config.trading.api_key,
-				secret: config.trading.api_secret
+				key: config.bittrex.api_key,
+				secret: config.bittrex.api_secret
 			}
 		});
 		// check for errors
@@ -297,8 +297,8 @@ module.exports = {
 			url: `${marketUrl}/getopenorders`,
 			params: {},
 			api: {
-				key: config.trading.api_key,
-				secret: config.trading.api_secret
+				key: config.bittrex.api_key,
+				secret: config.bittrex.api_secret
 			}
 		});
 		// check for errors
@@ -314,8 +314,8 @@ module.exports = {
 				uuid: uuid
 			},
 			api: {
-				key: config.trading.api_key,
-				secret: config.trading.api_secret
+				key: config.bittrex.api_key,
+				secret: config.bittrex.api_secret
 			}
 		});
 		// check for errors

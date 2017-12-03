@@ -12,7 +12,7 @@ function* makeRequest(data) {
 	if (!data.params) {
 		data.params = {};
 	}
-	data.params["apikey"] = config.trading.key;
+	data.params["apikey"] = config.bittrex.key;
 	const nonce = new Date().getTime();
 	data.params["nonce"] = nonce;
 	const paramString = querystring.stringify(data.params);
@@ -20,7 +20,7 @@ function* makeRequest(data) {
 	let headers = {
 		"Content-Type": "application/json; charset=utf-8",
 		// eslint-disable-next-line
-		"apisign": crypto.HmacSHA512(uri, config.trading.secret)
+		"apisign": crypto.HmacSHA512(uri, config.bittrex.secret)
 	};
 	if (data.headers) {
 		headers = data.headers;
